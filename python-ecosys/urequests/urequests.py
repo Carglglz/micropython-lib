@@ -43,6 +43,8 @@ def request(
     auth=None,
     timeout=None,
     parse_headers=True,
+    cadata=None,
+    alt_host=None,
 ):
     redirect = None  # redirection url, None means no redirection
     chunked_data = data and getattr(data, "__iter__", None) and not getattr(data, "__len__", None)
@@ -63,7 +65,7 @@ def request(
     if proto == "http:":
         port = 80
     elif proto == "https:":
-        import ussl
+        import ssl
 
         port = 443
     else:
@@ -90,7 +92,16 @@ def request(
     try:
         s.connect(ai[-1])
         if proto == "https:":
-            s = ussl.wrap_socket(s, server_hostname=host)
+            if hasattr(ssl, "SSLContext"):
+                ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+                hostname = host
+                if alt_host:
+                    hostname = alt_host
+                if cadata:
+                    ctx.load_verify_locations(cadata=cadata)
+                s = ctx.wrap_socket(s, server_hostname=hostname)
+            else:
+                s = ssl.wrap_socket(s, server_hostname=host)
         s.write(b"%s /%s HTTP/1.0\r\n" % (method, path))
         if not "Host" in headers:
             s.write(b"Host: %s\r\n" % host)
