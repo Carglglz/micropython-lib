@@ -71,7 +71,10 @@ class ChunkedClientResponse(ClientResponse):
                 sep = await self.content.readexactly(2)
                 assert sep == b"\r\n"
                 return b""
-        data = await self.content.readexactly(min(sz, self.chunk_size))
+        if sz > 0:
+            data = await self.content.readexactly(min(sz, self.chunk_size))
+        else:
+            data = await self.content.readexactly(self.chunk_size)
         self.chunk_size -= len(data)
         if self.chunk_size == 0:
             sep = await self.content.readexactly(2)
@@ -207,7 +210,7 @@ class ClientSession:
                 method,
                 path,
                 version,
-                "\r\n".join(f"{k}: {v}" for k, v in headers.items()) + "\r\n" if headers else "",
+                ("\r\n".join(f"{k}: {v}" for k, v in headers.items()) + "\r\n" if headers else ""),
             )
         else:
             if json:
