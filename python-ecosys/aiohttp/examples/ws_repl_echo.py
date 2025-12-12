@@ -9,7 +9,7 @@ try:
     URL = sys.argv[1]  # expects a websocket echo server
     READ_BANNER = False
 except Exception:
-    URL = "ws://echo.websocket.events"
+    URL = "wss://echo.websocket.org"
     READ_BANNER = True
 
 

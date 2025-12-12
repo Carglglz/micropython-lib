@@ -8,7 +8,7 @@ import asyncio
 try:
     URL = sys.argv[1]  # expects a websocket echo server
 except Exception:
-    URL = "ws://echo.websocket.events"
+    URL = "wss://echo.websocket.org"
 
 
 sslctx = False
